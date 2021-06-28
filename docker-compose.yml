@@ -40,10 +40,26 @@ services:
     image: apache/zeppelin:0.8.1
     ports:
       - 8080:8080
+    environment: 
+      SPARK_SUBMIT_OPTIONS: "--packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.1.0,org.apache.spark:spark-sql_2.11:2.1.0,org.apache.kafka:kafka_2.11:0.10.0.1,org.apache.spark:spark-streaming-kafka-0-10_2.11:2.1.0,org.apache.kafka:kafka-clients:0.10.0.1"
     volumes:
       - ./zeppelin/notebook:/zeppelin/notebook
       - ./zeppelin/conf:/zeppelin/conf
       - ./zeppelin/data:/zeppelin/spark-warehouse
+
+  jupyter:
+    hostname: jupyter
+    container_name: jupyter
+    image: jupyter/all-spark-notebook
+    ports:
+      - 8888:8888
+    user: root
+    working_dir: /home/streams
+    environment: 
+      NB_USER: streams
+      CHOWN_HOME: "yes"
+    volumes:
+      - ./jupyter/work:/home/streams/work
 
   zookeeper:
     image: confluentinc/cp-zookeeper
