@@ -2,7 +2,7 @@ version: '3'
 
 services:
   neo4j:
-    image: neo4j:3.4.10
+    image: neo4j:4.3
     hostname: neo4j
     container_name: neo4j
     depends_on:
@@ -12,12 +12,13 @@ services:
       - 7474:7474
       - 7687:7687
     environment:
-      NEO4J_AUTH: "neo4j/zeppelin"
+      NEO4J_AUTH: "neo4j/streams"
       NEO4J_dbms_memory_heap_max__size: 8G
       NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
       NEO4J_kafka_zookeeper_connect: zookeeper:2181
       NEO4J_kafka_bootstrap_servers: broker:9093
-      NEO4J_streams_sink_topic_cypher_pharma: "
+      NEO4J_streams_sink_enabled_to_neo4j: "true"
+      NEO4J_streams_sink_topic_cypher_pharma_to_neo4j: "
           MERGE (p:Pharmacy{fiscalId: event.FISCAL_ID}) ON CREATE SET p.name = event.NAME
           MERGE (t:PharmacyType{type: event.TYPE_NAME})
           MERGE (a:Address{name: event.ADDRESS + ', ' + event.CITY})
@@ -34,23 +35,10 @@ services:
       - ./neo4j/plugins:/plugins
       - ./neo4j/data:/data
 
-  zeppelin:
-    hostname: zeppelin
-    container_name: zeppelin
-    image: apache/zeppelin:0.8.1
-    ports:
-      - 8080:8080
-    environment: 
-      SPARK_SUBMIT_OPTIONS: "--packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.1.0,org.apache.spark:spark-sql_2.11:2.1.0,org.apache.kafka:kafka_2.11:0.10.0.1,org.apache.spark:spark-streaming-kafka-0-10_2.11:2.1.0,org.apache.kafka:kafka-clients:0.10.0.1"
-    volumes:
-      - ./zeppelin/notebook:/zeppelin/notebook
-      - ./zeppelin/conf:/zeppelin/conf
-      - ./zeppelin/data:/zeppelin/spark-warehouse
-
   jupyter:
     hostname: jupyter
     container_name: jupyter
-    image: jupyter/all-spark-notebook
+    image: jupyter/pyspark-notebook
     ports:
       - 8888:8888
     user: root
@@ -58,8 +46,12 @@ services:
     environment: 
       NB_USER: streams
       CHOWN_HOME: "yes"
+      JUPYTER_ENABLE_LAB: "yes"
     volumes:
       - ./jupyter/work:/home/streams/work
+    entrypoint: start-notebook.sh
+    command:
+      - --ServerApp.password='sha1:33ac504f456e:1c124c9facbdab47e532284c8e74a0363528a561'
 
   zookeeper:
     image: confluentinc/cp-zookeeper

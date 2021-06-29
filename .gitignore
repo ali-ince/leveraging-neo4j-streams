@@ -1,0 +1,4 @@
+.ipynb_checkpoints
+.vscode
+neo4j/data
+jupyter/**/figure
