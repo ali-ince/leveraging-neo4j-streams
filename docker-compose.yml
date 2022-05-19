@@ -55,7 +55,7 @@ services:
       - ./jupyter/work:/home/streams/work
     entrypoint: start-notebook.sh
     command:
-      - --ServerApp.password='sha1:33ac504f456e:1c124c9facbdab47e532284c8e74a0363528a561'
+      - --ServerApp.password='sha1:ea32ac7729e9:935969b08bb03280a7835e52a342be36c5de5a3a'
 
   zookeeper:
     image: confluentinc/cp-zookeeper
